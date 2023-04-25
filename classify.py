@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MaxAbsScaler
 
 # load data from csv
-data = pd.read_csv('combined_min_merged.csv', encoding='latin1', sep=';')
+data = pd.read_csv('combined_min_binary.csv', encoding='latin1', sep=';')
 
 X = data['Transcription']
 
