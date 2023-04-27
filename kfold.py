@@ -1,11 +1,16 @@
-import pandas as pd
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import StratifiedKFold
-from sklearn.neural_network import MLPClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MaxAbsScaler
+import time
+import tkinter as tk
 
+import pandas as pd
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+
+start_time = time.time()
 # load data from csv
 data = pd.read_csv('combined_min_binary.csv', encoding='latin1', sep=';')
 
@@ -15,21 +20,52 @@ y = data['Dimension']
 # 5-fold cross-validation object
 skf = StratifiedKFold(n_splits=5)
 
-scores = []
+accuracies = []
+precisions = []
+recalls = []
+
 for train_index, test_index in skf.split(X, y):
-    # Split the data into training and teststing sets
+    # Split the data into training and testing sets
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
 
     nb = Pipeline(
         [('vect', CountVectorizer(max_features=1500, min_df=0, max_df=0.8)),
-         ('standardscaler', MaxAbsScaler()),
-         ('clf', MLPClassifier(alpha=1e-05, hidden_layer_sizes=(5, 2), random_state=1, solver='adam', max_iter=5000)),
+         ('clf', SVC(gamma=2, C=2)),  # RBF SVM
          ])
-
     nb.fit(X_train, y_train)
     y_pred = nb.predict(X_test)
-    score = accuracy_score(y_test, y_pred)
-    scores.append(score)
+    accuracy = accuracy_score(y_test, y_pred)
+    accuracies.append(accuracy)
+    # Report should mention that "macro" average is used, also that score is different for each class.
+    precision_recall_f_score = precision_recall_fscore_support(y_test, y_pred, average="macro")
+    precisions.append(precision_recall_f_score[0])
+    recalls.append(precision_recall_f_score[1])
 
-print("accuracy %s" % (sum(scores)/len(scores)))
+print("time %s seconds" % (time.time() - start_time))
+print("accuracy %s" % (sum(accuracies) / len(accuracies)))
+print("precision %s" % (sum(precisions) / len(precisions)))
+print("recall %s" % (sum(recalls) / len(recalls)))
+
+root = tk.Tk()
+frame = tk.Frame(root)
+frame.pack()
+
+dimension_labels = ["Conversation Management", "Other"]
+predictions = [list(y_pred).count("Conversation Management"), list(y_pred).count("Other")]
+figure1 = Figure()
+tasty = figure1.add_subplot(111)
+tasty.pie(predictions, radius=1, labels=dimension_labels, autopct='%0.2f%%')
+tasty.set_title('Predicted Values')
+chart = FigureCanvasTkAgg(figure1, frame)
+chart.get_tk_widget().pack(side=tk.RIGHT)
+
+actual = [list(y_test).count("Conversation Management"), list(y_test).count("Other")]
+figure2 = Figure()
+delicious = figure2.add_subplot(111)
+delicious.pie(actual, radius=1, labels=dimension_labels, autopct='%0.2f%%')
+delicious.set_title('Actual Values')
+chart = FigureCanvasTkAgg(figure2, frame)
+chart.get_tk_widget().pack(side=tk.LEFT)
+
+root.mainloop()
