@@ -18,7 +18,10 @@ X = data['Transcription']
 y = data['Dimension']
 
 # 5-fold cross-validation object
+# increase in accuracy is due to split
 skf = StratifiedKFold(n_splits=5)
+# example with lower accuracy
+# skf = StratifiedKFold(n_splits=5, random_state=99, shuffle=True)
 
 accuracies = []
 precisions = []
@@ -31,7 +34,7 @@ for train_index, test_index in skf.split(X, y):
 
     nb = Pipeline(
         [('vect', CountVectorizer(max_features=1500, min_df=0, max_df=0.8)),
-         ('clf', SVC(gamma=2, C=2)),  # RBF SVM
+         ('clf', SVC(gamma=1, probability=False, class_weight={"Conversation Management": 1.4, "Other": 1})),
          ])
     nb.fit(X_train, y_train)
     y_pred = nb.predict(X_test)
