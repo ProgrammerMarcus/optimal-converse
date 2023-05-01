@@ -24,15 +24,20 @@ classifiers = [
     MLPClassifier(alpha=1, max_iter=1000),
     AdaBoostClassifier(),
 ]
+sampler = [
+    SMOTE(),
+    RandomUnderSampler()
+]
 # load data
 data = pd.read_csv('combined_min_binary.csv', encoding='latin1', sep=';')
 X = data['Transcription']
 Y = data['Dimension']
 
-for c in classifiers:
+for s in sampler:
     steps = [
         ('vect', CountVectorizer(max_features=None, min_df=0, max_df=0.9)),
-        ('model', c),
+        ('e', s),
+        ('model', SVC(gamma=1)),
     ]
     pipeline = Pipeline(steps=steps)
 
@@ -40,7 +45,22 @@ for c in classifiers:
     scores = cross_validate(pipeline, X, Y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
 
     # print("Bag of words + C-Support Vector Classification")
-    print(c.__class__)
+    print(s.__class__)
     print("accuracy %s" % (sum(scores["test_accuracy"]) / len(scores["test_accuracy"])))
     print("recall(macro) %s" % (sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"])))
     print("precision(macro) %s" % (sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])))
+
+steps = [
+    ('vect', CountVectorizer(max_features=None, min_df=0, max_df=0.9)),
+    ('model', SVC(gamma=1)),
+]
+pipeline = Pipeline(steps=steps)
+
+# evaluate pipeline
+scores = cross_validate(pipeline, X, Y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
+
+# print("Bag of words + C-Support Vector Classification")
+print("none")
+print("accuracy %s" % (sum(scores["test_accuracy"]) / len(scores["test_accuracy"])))
+print("recall(macro) %s" % (sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"])))
+print("precision(macro) %s" % (sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])))

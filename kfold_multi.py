@@ -12,7 +12,7 @@ from sklearn.svm import SVC
 
 start_time = time.time()
 # load data from csv
-data = pd.read_csv('combined_min_binary.csv', encoding='latin1', sep=';')
+data = pd.read_csv('combined_min.csv', encoding='utf-8-sig', sep=';')
 
 X = data['Transcription']
 y = data['Dimension']
@@ -26,7 +26,6 @@ skf = StratifiedKFold(n_splits=5)
 accuracies = []
 precisions = []
 recalls = []
-perl = []
 
 for train_index, test_index in skf.split(X, y):
     # Split the data into training and testing sets
@@ -35,7 +34,7 @@ for train_index, test_index in skf.split(X, y):
 
     nb = Pipeline(
         [('vect', CountVectorizer(max_features=1500, min_df=0, max_df=0.8)),
-         ('clf', SVC(gamma=1, probability=False, class_weight={"Conversation Management": 1.4, "Other": 1})),
+         ('clf', SVC(gamma=1, probability=False)),
          ])
     nb.fit(X_train, y_train)
     y_pred = nb.predict(X_test)
@@ -43,9 +42,6 @@ for train_index, test_index in skf.split(X, y):
     accuracies.append(accuracy)
     # Report should mention that "macro" average is used, also that score is different for each class.
     precision_recall_f_score = precision_recall_fscore_support(y_test, y_pred, average="macro")
-    sep = precision_recall_fscore_support(y_test, y_pred,
-                                    labels=["Conversation Management", "Other"])
-    perl.append(sep)
     precisions.append(precision_recall_f_score[0])
     recalls.append(precision_recall_f_score[1])
 
@@ -53,15 +49,13 @@ print("time %s seconds" % (time.time() - start_time))
 print("accuracy %s" % (sum(accuracies) / len(accuracies)))
 print("precision %s" % (sum(precisions) / len(precisions)))
 print("recall %s" % (sum(recalls) / len(recalls)))
-print("cm p:" + str(sum([x[1][0] for x in perl]) / 5))
-print("cm r:" + str(sum([x[0][0] for x in perl]) / 5))
 
 root = tk.Tk()
 frame = tk.Frame(root)
 frame.pack()
 
-dimension_labels = ["Conversation Management", "Other"]
-predictions = [list(y_pred).count("Conversation Management"), list(y_pred).count("Other")]
+dimension_labels = set(y.array)
+predictions = [list(y_pred).count(x) for x in dimension_labels]
 figure1 = Figure()
 tasty = figure1.add_subplot(111)
 tasty.pie(predictions, radius=1, labels=dimension_labels, autopct='%0.2f%%')
@@ -69,7 +63,7 @@ tasty.set_title('Predicted Values')
 chart = FigureCanvasTkAgg(figure1, frame)
 chart.get_tk_widget().pack(side=tk.RIGHT)
 
-actual = [list(y_test).count("Conversation Management"), list(y_test).count("Other")]
+actual = [list(y_pred).count(x) for x in dimension_labels]
 figure2 = Figure()
 delicious = figure2.add_subplot(111)
 delicious.pie(actual, radius=1, labels=dimension_labels, autopct='%0.2f%%')
