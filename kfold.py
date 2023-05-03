@@ -10,6 +10,10 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 
+"""
+Loads two conversation management dimensions and shows a graph.
+"""
+
 start_time = time.time()
 # load data from csv
 data = pd.read_csv('combined_min_binary.csv', encoding='latin1', sep=';')
@@ -53,8 +57,6 @@ print("time %s seconds" % (time.time() - start_time))
 print("accuracy %s" % (sum(accuracies) / len(accuracies)))
 print("precision %s" % (sum(precisions) / len(precisions)))
 print("recall %s" % (sum(recalls) / len(recalls)))
-print("cm p:" + str(sum([x[1][0] for x in perl]) / 5))
-print("cm r:" + str(sum([x[0][0] for x in perl]) / 5))
 
 root = tk.Tk()
 frame = tk.Frame(root)
