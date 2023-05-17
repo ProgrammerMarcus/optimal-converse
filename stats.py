@@ -73,52 +73,61 @@ def fold_performance():
                               float_format="{:.4f}".format))
 
 
-fold_performance()
-
 # classifiers
 
-classifiers = [
-    KNeighborsClassifier(),
-    SVC(kernel="linear"),
-    SVC(kernel="rbf", gamma="scale"),
-    SVC(kernel="rbf", gamma=1),
-    DecisionTreeClassifier(),
-    RandomForestClassifier(),
-    MLPClassifier(alpha=1, max_iter=1000),
-    AdaBoostClassifier(),
-]
 
-names = ["3-Neighbour", "Linear SVM", "RBF SVM (scale)", "RBF SVM (1)", "Decision Tree", "Random Forest", "MLP", "AdaBoost"]
-accuracy = []
-precision = []
-recall = []
+def classifier_performance():
+    """
+    Prints the statistics of each classifier in the list 'classifiers' in LaTex format.
 
-for c, n in zip(classifiers, names):
-    steps = [
-        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
-        ('model', c),
+    The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
+    It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
+    """
+    classifiers = [
+        KNeighborsClassifier(),
+        SVC(kernel="linear"),
+        SVC(kernel="rbf", gamma="scale"),
+        SVC(kernel="rbf", gamma=1),
+        DecisionTreeClassifier(),
+        RandomForestClassifier(),
+        MLPClassifier(alpha=1, max_iter=1000),
+        AdaBoostClassifier(),
     ]
-    pipeline = Pipeline(steps=steps)
 
-    # evaluate pipeline
-    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
+    names = ["3-Neighbour", "Linear SVM", "RBF SVM (scale)", "RBF SVM (1)", "Decision Tree", "Random Forest", "MLP", "AdaBoost"]
+    accuracy = []
+    precision = []
+    recall = []
 
-    accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
-    precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
-    recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
+    for c, n in zip(classifiers, names):
+        steps = [
+            ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+            ('model', c),
+        ]
+        pipeline = Pipeline(steps=steps)
 
-table = {'Name': names,
-         'Accuracy': accuracy,
-         'Precision': precision,
-         'Recall': recall}
+        # evaluate pipeline
+        scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
 
-data_folds = pd.DataFrame(data=table)
+        accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
+        precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
+        recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
 
-print(data_folds.to_latex(caption="Classifier Performance",
-                          index=False,
-                          formatters={"name": str.upper},
-                          float_format="{:.4f}".format))
+    table = {'Name': names,
+             'Accuracy': accuracy,
+             'Precision': precision,
+             'Recall': recall}
 
+    data_folds = pd.DataFrame(data=table)
+
+    print(data_folds.to_latex(caption="Classifier Performance",
+                              index=False,
+                              formatters={"name": str.upper},
+                              float_format="{:.4f}".format))
+
+
+fold_performance()
+classifier_performance()
 # vectorizers
 
 vecotorizers = [
