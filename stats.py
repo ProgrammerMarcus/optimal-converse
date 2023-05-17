@@ -42,27 +42,38 @@ df = df.replace(creative_conflict, 'Creative Conflict')
 y = df['Name']
 X = df['Coded Text']
 
-# folds
 
-steps = [
-    ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
-    ('model', RandomForestClassifier()),
-]
-pipeline = Pipeline(steps=steps)
+def fold_performance():
+    """
+    Prints the statistics of each fold in Stratified 5-fold cross-validation in LaTex format.
 
-# evaluate pipeline
-scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
+    The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
+    It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
 
-table = {'Accuracy': scores["test_accuracy"],
-         'Precision': scores["test_precision_macro"],
-         'Recall': scores["test_recall_macro"]}
+    """
 
-data_folds = pd.DataFrame(data=table)
+    steps = [
+        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+        ('model', RandomForestClassifier()),
+    ]
+    pipeline = Pipeline(steps=steps)
 
-print(data_folds.to_latex(caption="Fold Performance",
-                          index=False,
-                          formatters={"name": str.upper},
-                          float_format="{:.4f}".format))
+    # evaluate pipeline
+    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
+
+    table = {'Accuracy': scores["test_accuracy"],
+             'Precision': scores["test_precision_macro"],
+             'Recall': scores["test_recall_macro"]}
+
+    data_folds = pd.DataFrame(data=table)
+
+    print(data_folds.to_latex(caption="Fold Performance",
+                              index=False,
+                              formatters={"name": str.upper},
+                              float_format="{:.4f}".format))
+
+
+fold_performance()
 
 # classifiers
 
