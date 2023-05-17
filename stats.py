@@ -23,11 +23,11 @@ active_discussion = ['Encourage', 'Lead', 'Inform', 'Justify', 'Suggest', 'Reque
                      'Opinion', 'Justification', 'Information']
 
 creative_conflict = ['Offer Alternative', 'Propose Exception', 'Doubt', 'Suppose', 'Mediate', 'Agree', 'Disagree',
-                     'Argue', 'Infer', ]
+                     'Argue', 'Infer', 'Conciliate', ]
 
 unknown = ['Scoping', 'Technical Problem', 'Communication Decision', 'Design Principle', 'Functionality',
            'Technical Question', 'Implementation Decision', 'Use Case', 'Usability and User Interface', 'Awareness',
-           'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Conciliate', 'Rephrase', 'Actor',
+           'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Rephrase', 'Actor',
            'Structural Decision', 'Coordinate Group Process', 'Driver', 'Data Decision', 'Assumption']
 
 df = pd.read_csv('combined.csv', encoding='latin1', sep=';')
@@ -45,8 +45,8 @@ X = df['Coded Text']
 # folds
 
 steps = [
-    ('vect', CountVectorizer(max_features=None, min_df=0, max_df=0.9)),
-    ('model', SVC(gamma=1)),
+    ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+    ('model', MLPClassifier(alpha=1, max_iter=1000)),
 ]
 pipeline = Pipeline(steps=steps)
 
@@ -67,23 +67,24 @@ print(data_folds.to_latex(caption="Fold Performance",
 # classifiers
 
 classifiers = [
-    KNeighborsClassifier(3),
-    SVC(kernel="linear", C=0.025),
-    SVC(gamma=1),
-    DecisionTreeClassifier(max_depth=5),
-    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+    KNeighborsClassifier(),
+    SVC(kernel="linear"),
+    SVC(kernel="rbf (gamma='scale')", gamma="scale"),
+    SVC(kernel="rbf (gamma=1)", gamma=1),
+    DecisionTreeClassifier(),
+    RandomForestClassifier(),
     MLPClassifier(alpha=1, max_iter=1000),
     AdaBoostClassifier(),
 ]
 
-names = ["3-Neighbour", "Linear SVM", "RBF SVM", "Decision Tree", "Random Forest", "MLP", "AdaBoost"]
+names = ["3-Neighbour", "Linear SVM", "RBF SVM (scale)", "RBF SVM (1)", "Decision Tree", "Random Forest", "MLP", "AdaBoost"]
 accuracy = []
 precision = []
 recall = []
 
 for c, n in zip(classifiers, names):
     steps = [
-        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=0.9)),
+        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
         ('model', c),
     ]
     pipeline = Pipeline(steps=steps)
@@ -110,10 +111,10 @@ print(data_folds.to_latex(caption="Classifier Performance",
 # vectorizers
 
 vecotorizers = [
-    CountVectorizer(max_features=None, min_df=0, max_df=0.9),
-    CountVectorizer(max_features=None, min_df=0, max_df=0.9, stop_words=stopwords.words('english')),
-    TfidfVectorizer(max_features=None, min_df=0, max_df=0.9),
-    TfidfVectorizer(max_features=None, min_df=0, max_df=0.9, stop_words=stopwords.words('english')),
+    CountVectorizer(max_features=None, min_df=0, max_df=1.0),
+    CountVectorizer(max_features=None, min_df=0, max_df=1.0, stop_words=stopwords.words('english')),
+    TfidfVectorizer(max_features=None, min_df=0, max_df=1.0),
+    TfidfVectorizer(max_features=None, min_df=0, max_df=1.0, stop_words=stopwords.words('english')),
 ]
 
 names = ["Bag-of-words", "Bag-of-words (Remove Stopwords)", "TF-IDF", "TF-IDF (Remove Stopwords)"]
@@ -124,7 +125,7 @@ recall = []
 for v, n in zip(vecotorizers, names):
     steps = [
         ('vect', v),
-        ('model', SVC(gamma=1),),
+        ('model', RandomForestClassifier()),
     ]
     pipeline = Pipeline(steps=steps)
 
@@ -161,9 +162,9 @@ recall = []
 
 for s, n in zip(samplers, names):
     steps = [
-        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=0.9)),
+        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
         ('samper', s),
-        ('model', SVC(gamma=1)),
+        ('model', RandomForestClassifier()),
     ]
     pipeline = Pipeline(steps=steps)
 

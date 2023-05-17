@@ -5,19 +5,21 @@ import numpy as np
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
 
 """
 Loads three conversation management dimensions and shows a graph.
 """
 
 start_time = time.time()
-# load data from csv
-# load data from csv
+
+
 conversation_management = ['Appreciation', 'Request Confirmation', 'Apologize', 'Listening', 'Suggest Action',
                            'Acknowledge', 'Accept and Confirm', 'Task', 'Request Focus Change', 'Summarize Information',
                            'Reject', 'Request Attention', 'Maintenance']
@@ -27,11 +29,11 @@ active_discussion = ['Encourage', 'Lead', 'Inform', 'Justify', 'Suggest', 'Reque
                      'Opinion', 'Justification', 'Information']
 
 creative_conflict = ['Offer Alternative', 'Propose Exception', 'Doubt', 'Suppose', 'Mediate', 'Agree', 'Disagree',
-                     'Argue', 'Infer', ]
+                     'Argue', 'Infer', 'Conciliate', ]
 
 unknown = ['Scoping', 'Technical Problem', 'Communication Decision', 'Design Principle', 'Functionality',
            'Technical Question', 'Implementation Decision', 'Use Case', 'Usability and User Interface', 'Awareness',
-           'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Conciliate', 'Rephrase', 'Actor',
+           'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Rephrase', 'Actor',
            'Structural Decision', 'Coordinate Group Process', 'Driver', 'Data Decision', 'Assumption']
 
 df = pd.read_csv('combined.csv', encoding='latin1', sep=';')
@@ -67,8 +69,8 @@ for train_index, test_index in skf.split(X, y):
     y_train, y_test = y[train_index], y[test_index]
 
     nb = Pipeline(
-        [('vect', CountVectorizer(max_features=None, min_df=0, max_df=0.9)),
-         ('model', SVC(gamma='scale', kernel="rbf")),
+        [('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+         ('model', RandomForestClassifier()),
          ])
     nb.fit(X_train, y_train)
     y_pred = nb.predict(X_test)
@@ -82,9 +84,9 @@ for train_index, test_index in skf.split(X, y):
     truth += list(y_test)
 
 print("time %s seconds" % (time.time() - start_time))
-print("accuracy %s" % (sum(accuracies) / len(accuracies)))
-print("precision %s" % (sum(precisions) / len(precisions)))
-print("recall %s" % (sum(recalls) / len(recalls)))
+print("accuracy %s" % round((sum(accuracies) / len(accuracies)), 4))
+print("precision %s" % round((sum(precisions) / len(precisions)), 4))
+print("recall %s" % round((sum(recalls) / len(recalls)), 4))
 root = tk.Tk()
 frame = tk.Frame(root)
 frame.pack()

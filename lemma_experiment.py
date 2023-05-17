@@ -8,9 +8,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedKFold
+from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
 from nltk.tokenize import word_tokenize
@@ -26,11 +28,11 @@ active_discussion = ['Encourage', 'Lead', 'Inform', 'Justify', 'Suggest', 'Reque
                      'Opinion', 'Justification', 'Information']
 
 creative_conflict = ['Offer Alternative', 'Propose Exception', 'Doubt', 'Suppose', 'Mediate', 'Agree', 'Disagree',
-                     'Argue', 'Infer', ]
+                     'Argue', 'Infer', 'Conciliate', ]
 
 unknown = ['Scoping', 'Technical Problem', 'Communication Decision', 'Design Principle', 'Functionality',
            'Technical Question', 'Implementation Decision', 'Use Case', 'Usability and User Interface', 'Awareness',
-           'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Conciliate', 'Rephrase', 'Actor',
+           'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Rephrase', 'Actor',
            'Structural Decision', 'Coordinate Group Process', 'Driver', 'Data Decision', 'Assumption']
 
 df = pd.read_csv('combined.csv', encoding='latin1', sep=';')
@@ -69,8 +71,8 @@ for train_index, test_index in skf.split(X, y):
     y_train, y_test = y[train_index], y[test_index]
 
     nb = Pipeline(
-        [('vect', CountVectorizer(max_features=1500, min_df=0, max_df=0.8)),
-         ('clf', SVC(gamma=1, probability=False)),
+        [('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+         ('model', RandomForestClassifier()),
          ])
     nb.fit(X_train, y_train)
     y_pred = nb.predict(X_test)
