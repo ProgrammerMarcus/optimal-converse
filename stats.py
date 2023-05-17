@@ -125,7 +125,7 @@ def classifier_performance():
 
 def vectorizer_performance():
     """
-    Prints the statistics of each cvectorizer in the list 'vectorizers' in LaTex format.
+    Prints the statistics of each vectorizer in the list 'vectorizers' in LaTex format.
 
     The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
     It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
@@ -169,45 +169,52 @@ def vectorizer_performance():
                               float_format="{:.4f}".format))
 
 
+def sampler_performance():
+    """
+    Prints the statistics of 'SMOTE oversampling' and 'Random Undersampling' in LaTex format.
+
+    The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
+    It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
+    """
+    samplers = [
+        SMOTE(),
+        RandomUnderSampler()
+    ]
+
+    names = ["SMOTE oversampling", "Random Undersampling"]
+    accuracy = []
+    precision = []
+    recall = []
+
+    for s, n in zip(samplers, names):
+        steps = [
+            ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+            ('samper', s),
+            ('model', RandomForestClassifier()),
+        ]
+        pipeline = Pipeline(steps=steps)
+
+        # evaluate pipeline
+        scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
+
+        accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
+        precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
+        recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
+
+    table = {'Name': names,
+             'Accuracy': accuracy,
+             'Precision': precision,
+             'Recall': recall}
+
+    data_folds = pd.DataFrame(data=table)
+
+    print(data_folds.to_latex(caption="Sampler Performance",
+                              index=False,
+                              formatters={"name": str.upper},
+                              float_format="{:.4f}".format))
+
+
 fold_performance()
 classifier_performance()
 vectorizer_performance()
-
-# samplers
-
-samplers = [
-    SMOTE(),
-    RandomUnderSampler()
-]
-
-names = ["SMOTE oversampling", "Random Undersampling"]
-accuracy = []
-precision = []
-recall = []
-
-for s, n in zip(samplers, names):
-    steps = [
-        ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
-        ('samper', s),
-        ('model', RandomForestClassifier()),
-    ]
-    pipeline = Pipeline(steps=steps)
-
-    # evaluate pipeline
-    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
-
-    accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
-    precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
-    recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
-
-table = {'Name': names,
-         'Accuracy': accuracy,
-         'Precision': precision,
-         'Recall': recall}
-
-data_folds = pd.DataFrame(data=table)
-
-print(data_folds.to_latex(caption="Sampler Performance",
-                          index=False,
-                          formatters={"name": str.upper},
-                          float_format="{:.4f}".format))
+sampler_performance()
