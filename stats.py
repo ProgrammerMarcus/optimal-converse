@@ -73,9 +73,6 @@ def fold_performance():
                               float_format="{:.4f}".format))
 
 
-# classifiers
-
-
 def classifier_performance():
     """
     Prints the statistics of each classifier in the list 'classifiers' in LaTex format.
@@ -126,47 +123,55 @@ def classifier_performance():
                               float_format="{:.4f}".format))
 
 
+def vectorizer_performance():
+    """
+    Prints the statistics of each cvectorizer in the list 'vectorizers' in LaTex format.
+
+    The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
+    It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
+    """
+    vecotorizers = [
+        CountVectorizer(max_features=None, min_df=0, max_df=1.0),
+        CountVectorizer(max_features=None, min_df=0, max_df=1.0, stop_words=stopwords.words('english')),
+        TfidfVectorizer(max_features=None, min_df=0, max_df=1.0),
+        TfidfVectorizer(max_features=None, min_df=0, max_df=1.0, stop_words=stopwords.words('english')),
+    ]
+
+    names = ["Bag-of-words", "Bag-of-words (Remove Stopwords)", "TF-IDF", "TF-IDF (Remove Stopwords)"]
+    accuracy = []
+    precision = []
+    recall = []
+
+    for v, n in zip(vecotorizers, names):
+        steps = [
+            ('vect', v),
+            ('model', RandomForestClassifier()),
+        ]
+        pipeline = Pipeline(steps=steps)
+
+        # evaluate pipeline
+        scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
+
+        accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
+        precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
+        recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
+
+    table = {'Name': names,
+             'Accuracy': accuracy,
+             'Precision': precision,
+             'Recall': recall}
+
+    data_folds = pd.DataFrame(data=table)
+
+    print(data_folds.to_latex(caption="Vectorizer Performance",
+                              index=False,
+                              formatters={"name": str.upper},
+                              float_format="{:.4f}".format))
+
+
 fold_performance()
 classifier_performance()
-# vectorizers
-
-vecotorizers = [
-    CountVectorizer(max_features=None, min_df=0, max_df=1.0),
-    CountVectorizer(max_features=None, min_df=0, max_df=1.0, stop_words=stopwords.words('english')),
-    TfidfVectorizer(max_features=None, min_df=0, max_df=1.0),
-    TfidfVectorizer(max_features=None, min_df=0, max_df=1.0, stop_words=stopwords.words('english')),
-]
-
-names = ["Bag-of-words", "Bag-of-words (Remove Stopwords)", "TF-IDF", "TF-IDF (Remove Stopwords)"]
-accuracy = []
-precision = []
-recall = []
-
-for v, n in zip(vecotorizers, names):
-    steps = [
-        ('vect', v),
-        ('model', RandomForestClassifier()),
-    ]
-    pipeline = Pipeline(steps=steps)
-
-    # evaluate pipeline
-    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=5, n_jobs=-1)
-
-    accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
-    precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
-    recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
-
-table = {'Name': names,
-         'Accuracy': accuracy,
-         'Precision': precision,
-         'Recall': recall}
-
-data_folds = pd.DataFrame(data=table)
-
-print(data_folds.to_latex(caption="Vectorizer Performance",
-                          index=False,
-                          formatters={"name": str.upper},
-                          float_format="{:.4f}".format))
+vectorizer_performance()
 
 # samplers
 
