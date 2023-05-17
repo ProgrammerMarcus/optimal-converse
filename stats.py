@@ -46,7 +46,7 @@ X = df['Coded Text']
 
 steps = [
     ('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
-    ('model', MLPClassifier(alpha=1, max_iter=1000)),
+    ('model', RandomForestClassifier()),
 ]
 pipeline = Pipeline(steps=steps)
 
