@@ -1,21 +1,14 @@
-import re
 import time
-import tkinter as tk
 
 import numpy as np
 import pandas as pd
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedKFold
-from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.svm import SVC
-from nltk.tokenize import word_tokenize
 
 start_time = time.time()
 
@@ -56,10 +49,9 @@ for i in range(len(text)):
     words.append(r)
 X = np.array(words)
 y = np.array(y)
-print(X)
 
 # 5-fold cross-validation object
-skf = StratifiedKFold(n_splits=5)
+skf = StratifiedKFold(n_splits=5, random_state=66, shuffle=True)
 
 accuracies = []
 precisions = []
@@ -71,7 +63,7 @@ for train_index, test_index in skf.split(X, y):
     y_train, y_test = y[train_index], y[test_index]
 
     nb = Pipeline(
-        [('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+        [('vect', CountVectorizer(max_features=1000, min_df=0, max_df=0.9)),
          ('model', RandomForestClassifier()),
          ])
     nb.fit(X_train, y_train)

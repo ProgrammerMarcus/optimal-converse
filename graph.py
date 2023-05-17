@@ -6,12 +6,10 @@ import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
-from sklearn.svm import SVC
-from sklearn.neural_network import MLPClassifier
 
 """
 Loads three conversation management dimensions and shows a graph.
@@ -53,9 +51,9 @@ y = np.array(y)
 
 # 5-fold cross-validation object
 # increase in accuracy is due to split
-skf = StratifiedKFold(n_splits=5)
+# skf = StratifiedKFold(n_splits=5)
 # example with lower accuracy
-# skf = StratifiedKFold(n_splits=5, random_state=99, shuffle=True)
+skf = StratifiedKFold(n_splits=5, random_state=66, shuffle=True)
 
 accuracies = []
 precisions = []
@@ -69,7 +67,7 @@ for train_index, test_index in skf.split(X, y):
     y_train, y_test = y[train_index], y[test_index]
 
     nb = Pipeline(
-        [('vect', CountVectorizer(max_features=None, min_df=0, max_df=1.0)),
+        [('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
          ('model', RandomForestClassifier()),
          ])
     nb.fit(X_train, y_train)
