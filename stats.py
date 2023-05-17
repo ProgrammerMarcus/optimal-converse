@@ -184,10 +184,11 @@ def sampler_performance():
     """
     samplers = [
         SMOTE(),
-        RandomUnderSampler()
+        RandomUnderSampler(),
+        None
     ]
 
-    names = ["SMOTE oversampling", "Random Undersampling"]
+    names = ["SMOTE oversampling", "Random Undersampling", "None"]
     accuracy = []
     precision = []
     recall = []
