@@ -1,11 +1,11 @@
 import pandas as pd
-import numpy
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
 from imblearn.under_sampling import RandomUnderSampler
 from nltk.corpus import stopwords
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate, StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -92,10 +92,11 @@ def classifier_performance():
         RandomForestClassifier(),
         MLPClassifier(alpha=1, max_iter=1000),
         AdaBoostClassifier(),
+        LogisticRegression(),
     ]
 
     names = ["5-Neighbour", "Linear SVM", "RBF SVM (scale)", "RBF SVM (1)", "Multinomial Naïve Bayes", "Decision Tree",
-             "Random Forest", "MLP", "AdaBoost"]
+             "Random Forest", "MLP", "AdaBoost", "Logistic Regression"]
     accuracy = []
     precision = []
     recall = []
@@ -182,31 +183,66 @@ def sampler_performance():
     The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
     It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
     """
-    samplers = [
-        SMOTE(),
-        RandomUnderSampler()
-    ]
 
-    names = ["SMOTE oversampling", "Random Undersampling"]
+    names = ["SAMPLER"]
     accuracy = []
     precision = []
     recall = []
 
-    for s, n in zip(samplers, names):
-        steps = [
-            ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
-            ('samper', s),
-            ('model', RandomForestClassifier()),
-        ]
-        pipeline = Pipeline(steps=steps)
+    steps = [
+        ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
+        ('over', SMOTE()),
+        ('under', RandomUnderSampler()),
+        ('model', RandomForestClassifier()),
+    ]
+    pipeline = Pipeline(steps=steps)
 
-        # evaluate pipeline
-        scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
-                                n_jobs=-1)
+    # evaluate pipeline
+    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
+                            n_jobs=-1)
 
-        accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
-        precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
-        recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
+    accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
+    precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
+    recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
+
+    table = {'Name': names,
+             'Accuracy': accuracy,
+             'Precision': precision,
+             'Recall': recall}
+
+    data_folds = pd.DataFrame(data=table)
+
+    print(data_folds.to_latex(caption="Sampler Performance",
+                              index=False,
+                              formatters={"name": str.upper},
+                              float_format="{:.4f}".format))
+
+def just_performance():
+    """
+    Prints the statistics of 'SMOTE oversampling' and 'Random Undersampling' in LaTex format.
+
+    The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
+    It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
+    """
+
+    names = ["STANDARD"]
+    accuracy = []
+    precision = []
+    recall = []
+
+    steps = [
+        ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
+        ('model', RandomForestClassifier()),
+    ]
+    pipeline = Pipeline(steps=steps)
+
+    # evaluate pipeline
+    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
+                            n_jobs=-1)
+
+    accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
+    precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
+    recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
 
     table = {'Name': names,
              'Accuracy': accuracy,
@@ -224,4 +260,5 @@ def sampler_performance():
 fold_performance()
 classifier_performance()
 vectorizer_performance()
-sampler_performance()
+# sampler_performance()
+just_performance()
