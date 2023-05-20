@@ -11,13 +11,16 @@ This folder contains a CSV file named **"combined.csv"**, that includes labeled 
 This folder contains the source code and implementation of the collaborative communication dimension analyzer tool, Optimal Converse. The files in the folder are:
 
 - **graph.py**  
-[file-description]
+Loads the three communication dimensions "Conversation Management", "Active Discussion", and "Creative Conflict" and generates
+a graph based on the provided data.
 
 - **lemma_experiment.py**  
-[file-description]
+Performs an experiment to evaluate the performance of a Random Forest classifier with lemmatized text data.
 
 - **stats.py**  
-[file-description]
+Performs statistical analysis on a dataset containing transcribed text data from **"data/combined.csv"**.
+This script provides insights into the performance of different classifiers, vectorizers, and samplers in analyzing transcribed text data,
+using metrics such as accuracy, precision, and recall.
 
 ## Required dependencies
 To successfully run Optimal Converse, ensure that the following dependencies are installed:
