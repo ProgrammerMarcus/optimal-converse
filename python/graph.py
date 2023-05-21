@@ -34,7 +34,7 @@ unknown = ['Scoping', 'Technical Problem', 'Communication Decision', 'Design Pri
            'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Rephrase', 'Actor',
            'Structural Decision', 'Coordinate Group Process', 'Driver', 'Data Decision', 'Assumption']
 
-df = pd.read_csv('combined.csv', encoding='latin1', sep=';')
+df = pd.read_csv('../data/combined.csv', encoding='latin1', sep=';')
 
 for u in unknown:
     df = df.drop(df[df['Name'] == u].index)
