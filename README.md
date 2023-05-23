@@ -29,6 +29,8 @@ To successfully run Optimal Converse, ensure that the following dependencies are
 - pandas
 - numpy
 - matplotlib
+- imblearn
+- nltk
 
 You can install these dependencies using a package manager like pip. Open a terminal or command prompt and execute the following commands:
 
@@ -36,6 +38,8 @@ pip install scikit-learn
 pip install pandas  
 pip install numpy  
 pip install matplotlib
+pip install imblearn
+pip install nltk
 
 ## Run with Python
 In order to get Optimal Converse running, follow these steps:
