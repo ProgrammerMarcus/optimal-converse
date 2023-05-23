@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
 from imblearn.under_sampling import RandomUnderSampler
