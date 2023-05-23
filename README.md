@@ -37,8 +37,8 @@ You can install these dependencies using a package manager like pip. Open a term
 pip install scikit-learn  
 pip install pandas  
 pip install numpy  
-pip install matplotlib
-pip install imblearn
+pip install matplotlib  
+pip install imblearn  
 pip install nltk
 
 ## Run with Python
@@ -46,6 +46,13 @@ In order to get Optimal Converse running, follow these steps:
 
 1. Clone the repository to you local machine:  
    git clone git@github.com:ProgrammerMarcus/optimal-converse.git
-2. Navigate to the repository on your machine:  
-   cd repo-name
-3. [next-step]
+2. Navigate to the 'python' folder in the repository on your machine:  
+   cd repo-name/python
+3. Choose one of the Python files (**'graph.py'**, **'lemma_experiment.py'**, or **'stats.py'**) to run,
+   depending on your desired functionality.
+   - To run **'graph.py'**, execute the following command:  
+   **python graph.py**
+   - To run **'lemma_experiment.py'**, execute the following command:  
+   **python lemma_experiment.py**
+   - To run **'stats.py'**, execute the following command:  
+   **python stats.py**
