@@ -260,6 +260,12 @@ def just_performance():
                               float_format="{:.4f}".format))
 
 def lemma_performance():
+    """
+    Prints the statistics of a single pipeline with lemmatization applied, in LaTex format.
+
+    Applies lemmatization to the text, before performing stratified K-fold cross validation and placing the results
+    in a Pandas DataFrame, which is then printed as a LaTeX Table.
+    """
     text = list(X)
     words = []
     for i in range(len(text)):
