@@ -15,6 +15,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from pathlib import Path
 
 # load and manage data
 
@@ -34,7 +35,7 @@ unknown = ['Scoping', 'Technical Problem', 'Communication Decision', 'Design Pri
            'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Rephrase', 'Actor',
            'Structural Decision', 'Coordinate Group Process', 'Driver', 'Data Decision', 'Assumption']
 
-df = pd.read_csv('../data/combined.csv', encoding='latin1', sep=';')
+df = pd.read_csv(Path(__file__).parent / '../data/combined.csv', encoding='latin1', sep=';')
 
 for u in unknown:
     df = df.drop(df[df['Name'] == u].index)
@@ -46,7 +47,7 @@ df = df.replace(creative_conflict, 'Creative Conflict')
 y = df['Name']
 X = df['Coded Text']
 
-skf = StratifiedKFold(n_splits=5, random_state=66, shuffle=True)
+skf = StratifiedKFold(n_splits=10, random_state=66, shuffle=True)
 
 def fold_performance():
     """

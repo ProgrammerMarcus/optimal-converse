@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
+from pathlib import Path
 
 """
 Loads three conversation management dimensions and shows a graph.
@@ -34,7 +35,7 @@ unknown = ['Scoping', 'Technical Problem', 'Communication Decision', 'Design Pri
            'Technical Decision', 'Behavioural Decision', 'Notation Decision', 'Rephrase', 'Actor',
            'Structural Decision', 'Coordinate Group Process', 'Driver', 'Data Decision', 'Assumption']
 
-df = pd.read_csv('../data/combined.csv', encoding='latin1', sep=';')
+df = pd.read_csv(Path(__file__).parent / '../data/combined.csv', encoding='latin1', sep=';')
 
 for u in unknown:
     df = df.drop(df[df['Name'] == u].index)
@@ -53,7 +54,7 @@ y = np.array(y)
 # increase in accuracy is due to split
 # skf = StratifiedKFold(n_splits=5)
 # example with lower accuracy
-skf = StratifiedKFold(n_splits=5, random_state=66, shuffle=True)
+skf = StratifiedKFold(n_splits=10, random_state=66, shuffle=True)
 
 accuracies = []
 precisions = []
