@@ -82,6 +82,16 @@ for train_index, test_index in skf.split(X, y):
     predictions += list(y_pred)
     truth += list(y_test)
 
+table = {'Accuracy': accuracies,
+         'Precision': precisions,
+         'Recall': recalls}
+
+data_folds = pd.DataFrame(data=table)
+
+print(data_folds.to_latex(caption="Fold Performance",
+                          formatters={"name": str.upper},
+                          float_format="{:.4f}".format))
+
 print("time %s seconds" % (time.time() - start_time))
 print("accuracy %s" % round((sum(accuracies) / len(accuracies)), 4))
 print("precision %s" % round((sum(precisions) / len(precisions)), 4))
