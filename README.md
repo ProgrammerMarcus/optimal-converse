@@ -4,23 +4,20 @@ Optimal Converse is a proof-of-concept tool implemented in Python, designed to m
 ## Content
 This repository contains the necessary resources to replicate and run the communication dimension analyzer tool, Optimal Converse. The repository includes the following folders:
 
-### Data:
-This folder contains a CSV file named **"combined.csv"**, that includes labeled transcriptions from [Does distance still matter? revisiting collaborative distributed software design](https://ieeexplore.ieee.org/document/8409905)
+### data
+This folder contains a CSV file named **"combined.csv"**, that includes labeled transcriptions from [Does distance still matter? revisiting collaborative distributed software design](https://ieeexplore.ieee.org/document/8409905).
 
-### Python:
+### python
 This folder contains the source code and implementation of the collaborative communication dimension analyzer tool, Optimal Converse. The files in the folder are:
 
 - **graph.py**  
 Loads the three communication dimensions "Conversation Management", "Active Discussion", and "Creative Conflict" and generates
 a graph based on the provided data.
 
-- **lemma_experiment.py**  
-Performs an experiment to evaluate the performance of a Random Forest classifier with lemmatized text data.
-
 - **stats.py**  
 Performs statistical analysis on a dataset containing transcribed text data from **"data/combined.csv"**.
 This script provides insights into the performance of different classifiers, vectorizers, and samplers in analyzing transcribed text data,
-using metrics such as accuracy, precision, and recall.
+using the metrics accuracy, precision, and recall.
 
 ## Required dependencies
 To successfully run Optimal Converse, ensure that the following dependencies are installed:
@@ -52,7 +49,5 @@ In order to get Optimal Converse running, follow these steps:
    depending on your desired functionality.
    - To run **'graph.py'**, execute the following command:  
    **python graph.py**
-   - To run **'lemma_experiment.py'**, execute the following command:  
-   **python lemma_experiment.py**
    - To run **'stats.py'**, execute the following command:  
    **python stats.py**
