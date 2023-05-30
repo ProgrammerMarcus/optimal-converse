@@ -1,8 +1,11 @@
 import time
 import tkinter as tk
 
+import nltk
 import numpy as np
 import pandas as pd
+
+from nltk import word_tokenize, WordNetLemmatizer
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from sklearn.ensemble import RandomForestClassifier
@@ -15,6 +18,9 @@ from pathlib import Path
 """
 Loads three conversation management dimensions and shows a graph.
 """
+
+# nltk.download('wordnet')
+lemmatizer = WordNetLemmatizer()
 
 start_time = time.time()
 
@@ -50,6 +56,14 @@ X = df['Coded Text']
 X = np.array(X)
 y = np.array(y)
 
+# Lemmatization
+lemmatized_X = []
+for text in X:
+    lemmatized_text = ' '.join([lemmatizer.lemmatize(word) for word in text.split()])
+    lemmatized_X.append(lemmatized_text)
+
+lemmatized_X = np.array(lemmatized_X)
+
 # 5-fold cross-validation object
 # increase in accuracy is due to split
 # skf = StratifiedKFold(n_splits=5)
@@ -62,9 +76,9 @@ recalls = []
 predictions = []
 truth = []
 
-for train_index, test_index in skf.split(X, y):
+for train_index, test_index in skf.split(lemmatized_X, y):
     # Split the data into training and testing sets
-    X_train, X_test = X[train_index], X[test_index]
+    X_train, X_test = lemmatized_X[train_index], lemmatized_X[test_index]
     y_train, y_test = y[train_index], y[test_index]
 
     nb = Pipeline(
