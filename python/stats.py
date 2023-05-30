@@ -49,6 +49,7 @@ X = df['Coded Text']
 
 skf = StratifiedKFold(n_splits=10, random_state=66, shuffle=True)
 
+
 def fold_performance():
     """
     Prints the statistics of each fold in Stratified 5-fold cross-validation in LaTex format.
@@ -71,7 +72,17 @@ def fold_performance():
              'Precision': scores["test_precision_macro"],
              'Recall': scores["test_recall_macro"]}
 
+    accuracy_average = (sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))
+    precision_average = sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])
+    recall_average = (sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))
+
     data_folds = pd.DataFrame(data=table)
+
+    average_row = pd.DataFrame({'Accuracy': accuracy_average,
+                                'Precision': precision_average,
+                                'Recall': recall_average}, index=['Average'])
+
+    data_folds = data_folds._append(average_row)
 
     print(data_folds.to_latex(caption="Fold Performance",
                               index=False,
@@ -221,6 +232,7 @@ def sampler_performance():
                               formatters={"name": str.upper},
                               float_format="{:.4f}".format))
 
+
 def just_performance():
     """
     Prints the statistics of a single pipeline in LaTex format.
@@ -259,6 +271,7 @@ def just_performance():
                               index=False,
                               formatters={"name": str.upper},
                               float_format="{:.4f}".format))
+
 
 def lemma_performance():
     """
