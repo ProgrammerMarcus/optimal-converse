@@ -20,7 +20,6 @@ Loads three conversation management dimensions and shows a graph.
 """
 
 # nltk.download('wordnet')
-lemmatizer = WordNetLemmatizer()
 
 start_time = time.time()
 
@@ -57,10 +56,13 @@ X = np.array(X)
 y = np.array(y)
 
 # Lemmatization
+text = list(X)
 lemmatized_X = []
-for text in X:
-    lemmatized_text = ' '.join([lemmatizer.lemmatize(word) for word in text.split()])
-    lemmatized_X.append(lemmatized_text)
+for i in range(len(text)):
+    r = word_tokenize(text[i])
+    r = [WordNetLemmatizer().lemmatize(word) for word in r]
+    r = ' '.join(r)
+    lemmatized_X.append(r)
 
 lemmatized_X = np.array(lemmatized_X)
 
