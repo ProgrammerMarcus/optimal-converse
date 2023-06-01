@@ -8,7 +8,7 @@ from nltk.corpus import stopwords
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import precision_recall_fscore_support, accuracy_score
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score, recall_score
 from sklearn.model_selection import cross_validate, StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -16,6 +16,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from pathlib import Path
+from functools import partial
+from sklearn.metrics import precision_score, make_scorer
 
 # load and manage data
 
@@ -233,41 +235,59 @@ def sampler_performance():
                               float_format="{:.4f}".format))
 
 
-def just_performance():
+def category_performance():
     """
-    Prints the statistics of a single pipeline in LaTex format.
+    Prints the statistics of all categories in single pipeline in LaTex format.
 
     The function retrieves performance scores such as accuracy, precision, and recall from the dictionary 'scores'.
     It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
     """
+    xe = np.array(X)
+    ye = np.array(y)
+    cm_recalls = []
+    cm_precisions = []
+    ad_recalls = []
+    ad_precisions = []
+    cc_recalls = []
+    cc_precisions = []
+    for train_index, test_index in skf.split(xe, ye):
+        # Split the data into training and testing sets
+        X_train, X_test = xe[train_index], xe[test_index]
+        y_train, y_test = ye[train_index], ye[test_index]
 
-    names = ["STANDARD"]
-    accuracy = []
-    precision = []
-    recall = []
+        nb = Pipeline(
+            [('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
+             ('model', RandomForestClassifier()),
+             ])
+        nb.fit(X_train, y_train)
+        y_pred = nb.predict(X_test)
+        precision_recall_f_score = precision_recall_fscore_support(
+            y_test, y_pred, average=None, labels=["Conversation Management", "Active Discussion", "Creative Conflict"])
+        cm_precisions.append(precision_recall_f_score[0][0])
+        cm_recalls.append(precision_recall_f_score[1][0])
+        ad_precisions.append(precision_recall_f_score[0][1])
+        ad_recalls.append(precision_recall_f_score[1][1])
+        cc_precisions.append(precision_recall_f_score[0][2])
+        cc_recalls.append(precision_recall_f_score[1][2])
 
-    steps = [
-        ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
-        ('model', RandomForestClassifier()),
-    ]
-    pipeline = Pipeline(steps=steps)
+    table = {
+        'Type': ["CM Precision", "CM Recall", "AD Precision", "AD Recall", "CC Precision", "CC Recall", "Average P",
+                 "Average R"],
+        'Scores': [sum(cm_precisions) / len(cm_precisions),
+                   sum(cm_recalls) / len(cm_recalls),
+                   sum(ad_precisions) / len(ad_precisions),
+                   sum(ad_recalls) / len(ad_recalls),
+                   sum(cc_precisions) / len(cc_precisions),
+                   sum(cc_recalls) / len(cc_recalls),
+                   sum(cm_precisions + ad_precisions + cc_precisions) / len(cm_precisions + ad_precisions + cc_precisions),
+                   sum(cm_recalls + ad_recalls + cc_recalls) / len(cm_recalls + ad_recalls + cc_recalls)]
+        }
 
-    # evaluate pipeline
-    scores = cross_validate(pipeline, X, y, scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
-                            n_jobs=-1)
-
-    accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
-    precision += [sum(scores["test_precision_macro"]) / len(scores["test_precision_macro"])]
-    recall += [(sum(scores["test_recall_macro"]) / len(scores["test_recall_macro"]))]
-
-    table = {'Name': names,
-             'Accuracy': accuracy,
-             'Precision': precision,
-             'Recall': recall}
+    print(table)
 
     data_folds = pd.DataFrame(data=table)
 
-    print(data_folds.to_latex(caption="Just Performance",
+    print(data_folds.to_latex(caption="Category Performance",
                               index=False,
                               formatters={"name": str.upper},
                               float_format="{:.4f}".format))
@@ -300,7 +320,8 @@ def lemma_performance():
     pipeline = Pipeline(steps=steps)
 
     # evaluate pipeline
-    scores = cross_validate(pipeline, np.array(words), np.array(y), scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
+    scores = cross_validate(pipeline, np.array(words), np.array(y),
+                            scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
                             n_jobs=-1)
 
     accuracy += [(sum(scores["test_accuracy"]) / len(scores["test_accuracy"]))]
@@ -319,9 +340,10 @@ def lemma_performance():
                               formatters={"name": str.upper},
                               float_format="{:.4f}".format))
 
+
 fold_performance()
 classifier_performance()
 vectorizer_performance()
 sampler_performance()
-just_performance()
+category_performance()
 lemma_performance()
