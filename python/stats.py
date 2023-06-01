@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from imblearn.over_sampling import SMOTE
@@ -8,16 +10,13 @@ from nltk.corpus import stopwords
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import precision_recall_fscore_support, accuracy_score, recall_score
+from sklearn.metrics import precision_recall_fscore_support
 from sklearn.model_selection import cross_validate, StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-from pathlib import Path
-from functools import partial
-from sklearn.metrics import precision_score, make_scorer
 
 # load and manage data
 
@@ -49,6 +48,17 @@ df = df.replace(creative_conflict, 'Creative Conflict')
 y = df['Name']
 X = df['Coded Text']
 
+text = list(X)
+words = []
+for i in range(len(text)):
+    r = word_tokenize(text[i])
+    r = [WordNetLemmatizer().lemmatize(word) for word in r]
+    r = ' '.join(r)
+    words.append(r)
+
+X = np.array(words)
+y = np.array(y)
+
 skf = StratifiedKFold(n_splits=10, random_state=66, shuffle=True)
 
 
@@ -63,7 +73,7 @@ def fold_performance():
 
     steps = [
         ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
-        ('model', RandomForestClassifier()),
+        ('model', RandomForestClassifier(random_state=66)),
     ]
     pipeline = Pipeline(steps=steps)
 
@@ -100,19 +110,18 @@ def classifier_performance():
     It creates a pandas DataFrame using the scores and then prints the DataFrame in LaTeX format.
     """
     classifiers = [
-        KNeighborsClassifier(),
-        SVC(kernel="linear"),
-        SVC(kernel="rbf", gamma="scale"),
-        SVC(kernel="rbf", gamma=1),
+        KNeighborsClassifier(5),
+        SVC(kernel="linear", random_state=66),
+        SVC(kernel="rbf", gamma="scale", random_state=66),
         MultinomialNB(),
-        DecisionTreeClassifier(),
-        RandomForestClassifier(),
+        DecisionTreeClassifier(random_state=66),
+        RandomForestClassifier(random_state=66),
         MLPClassifier(alpha=1, max_iter=1000),
-        AdaBoostClassifier(),
-        LogisticRegression(),
+        AdaBoostClassifier(random_state=66),
+        LogisticRegression(random_state=66),
     ]
 
-    names = ["5-Neighbour", "Linear SVM", "RBF SVM (scale)", "RBF SVM (1)", "Multinomial Naïve Bayes", "Decision Tree",
+    names = ["5-Neighbour", "Linear SVM", "RBF SVM (scale)", "Multinomial Naïve Bayes", "Decision Tree",
              "Random Forest", "MLP", "AdaBoost", "Logistic Regression"]
     accuracy = []
     precision = []
@@ -168,7 +177,7 @@ def vectorizer_performance():
     for v, n in zip(vecotorizers, names):
         steps = [
             ('vect', v),
-            ('model', RandomForestClassifier()),
+            ('model', RandomForestClassifier(random_state=66)),
         ]
         pipeline = Pipeline(steps=steps)
 
@@ -210,7 +219,7 @@ def sampler_performance():
         ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
         ('over', SMOTE()),
         ('under', RandomUnderSampler()),
-        ('model', RandomForestClassifier()),
+        ('model', RandomForestClassifier(random_state=66)),
     ]
     pipeline = Pipeline(steps=steps)
 
@@ -257,7 +266,7 @@ def category_performance():
 
         nb = Pipeline(
             [('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
-             ('model', RandomForestClassifier()),
+             ('model', RandomForestClassifier(random_state=66)),
              ])
         nb.fit(X_train, y_train)
         y_pred = nb.predict(X_test)
@@ -293,34 +302,27 @@ def category_performance():
                               float_format="{:.4f}".format))
 
 
-def lemma_performance():
+def no_lemma_performance():
     """
-    Prints the statistics of a single pipeline with lemmatization applied, in LaTex format.
+    Prints the statistics of a single pipeline with no lemmatization applied, in LaTex format.
 
-    Applies lemmatization to the text, before performing stratified K-fold cross validation and placing the results
+    Applies no lemmatization to the text, before performing stratified K-fold cross validation and placing the results
     in a Pandas DataFrame, which is then printed as a LaTeX Table.
     """
-    text = list(X)
-    words = []
-    for i in range(len(text)):
-        r = word_tokenize(text[i])
-        r = [WordNetLemmatizer().lemmatize(word) for word in r]
-        r = ' '.join(r)
-        words.append(r)
 
-    names = ["STANDARD"]
+    names = ["NO LEMMA"]
     accuracy = []
     precision = []
     recall = []
 
     steps = [
         ('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
-        ('model', RandomForestClassifier()),
+        ('model', RandomForestClassifier(random_state=66)),
     ]
     pipeline = Pipeline(steps=steps)
 
     # evaluate pipeline
-    scores = cross_validate(pipeline, np.array(words), np.array(y),
+    scores = cross_validate(pipeline, df['Coded Text'], df['Name'],
                             scoring=['accuracy', 'precision_macro', 'recall_macro'], cv=skf,
                             n_jobs=-1)
 
@@ -335,7 +337,7 @@ def lemma_performance():
 
     data_folds = pd.DataFrame(data=table)
 
-    print(data_folds.to_latex(caption="Lemma Performance",
+    print(data_folds.to_latex(caption="No-Lemma Performance",
                               index=False,
                               formatters={"name": str.upper},
                               float_format="{:.4f}".format))
@@ -346,4 +348,4 @@ classifier_performance()
 vectorizer_performance()
 sampler_performance()
 category_performance()
-lemma_performance()
+no_lemma_performance()

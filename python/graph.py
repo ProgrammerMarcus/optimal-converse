@@ -69,7 +69,7 @@ for train_index, test_index in skf.split(X, y):
 
     nb = Pipeline(
         [('vect', TfidfVectorizer(max_features=1000, min_df=0, max_df=0.9)),
-         ('model', RandomForestClassifier()),
+         ('model', RandomForestClassifier(random_state=66)),
          ])
     nb.fit(X_train, y_train)
     y_pred = nb.predict(X_test)
