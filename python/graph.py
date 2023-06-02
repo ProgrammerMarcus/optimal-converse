@@ -1,19 +1,17 @@
 import time
 import tkinter as tk
+from pathlib import Path
 
-import nltk
 import numpy as np
 import pandas as pd
-
-from nltk import word_tokenize, WordNetLemmatizer
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from nltk import WordNetLemmatizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
-from pathlib import Path
 
 """
 Loads three conversation management dimensions and shows a graph.
@@ -59,7 +57,8 @@ y = np.array(y)
 # Lemmatization
 lemmatized_X = []
 for text in X:
-    lemmatized_text = ' '.join([lemmatizer.lemmatize(word) for word in text.split()])
+
+    lemmatized_text = ' '.join([lemmatizer.lemmatize(word.lower()) for word in text.split()])
     lemmatized_X.append(lemmatized_text)
 
 lemmatized_X = np.array(lemmatized_X)

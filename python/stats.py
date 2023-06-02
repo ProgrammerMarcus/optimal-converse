@@ -48,15 +48,17 @@ df = df.replace(creative_conflict, 'Creative Conflict')
 y = df['Name']
 X = df['Coded Text']
 
-text = list(X)
-words = []
-for i in range(len(text)):
-    r = word_tokenize(text[i])
-    r = [WordNetLemmatizer().lemmatize(word) for word in r]
-    r = ' '.join(r)
-    words.append(r)
+# Lemmatization
+lemmatized_X = []
+lemmatizer = WordNetLemmatizer()
+for text in X:
 
-X = np.array(words)
+    lemmatized_text = ' '.join([lemmatizer.lemmatize(word.lower()) for word in text.split()])
+    lemmatized_X.append(lemmatized_text)
+
+lemmatized_X = np.array(lemmatized_X)
+
+X = np.array(lemmatized_X)
 y = np.array(y)
 
 skf = StratifiedKFold(n_splits=10, random_state=66, shuffle=True)
